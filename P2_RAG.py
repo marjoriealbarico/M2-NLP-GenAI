@@ -52,7 +52,7 @@ vectorstore = FAISS.from_texts(
 
 retriever = vectorstore.as_retriever()
 
-# Check the size of the vector store
+# Vérifier la taille du vector store
 vector_store_size = vectorstore.index.ntotal
 st.write(f"Vector store contains {vector_store_size} vectors.")
 
@@ -70,7 +70,7 @@ Relevant documents: {documents}
 Your response should be based solely on the relevant documents and passages provided.
 """
 
-# Configuration de l'API OpenAI (Assurez-vous que vous avez configuré votre clé API)
+# Configuration de l'API OpenAI
 openai.api_key = 'your-api-key'
 
 
@@ -79,7 +79,7 @@ def query_gpt3_turbo(query, documents):
     prompt = prompt_template.format(query=query, documents=documents)
     
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",  # Utilisez GPT-3.5 Turbo
+        model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
@@ -90,7 +90,7 @@ def query_gpt3_turbo(query, documents):
     
     return response.choices[0].message['content']
 
-# Ask the user for a query
+# Demander à l'utilisateur de saisir une requête
 query = st.text_input("Enter your query:", "Products from China?")
 
 if query:
