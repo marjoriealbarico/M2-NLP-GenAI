@@ -56,6 +56,11 @@ retriever = vectorstore.as_retriever()
 vector_store_size = vectorstore.index.ntotal
 st.write(f"Vector store contains {vector_store_size} vectors.")
 
+# Création d'une interface pour tester différents paramètres
+temperature = st.slider("Temperature", 0.0, 1.0, 0.0, 0.1)  # Slider pour Temperature
+top_p = st.slider("Top-p", 0.0, 1.0, 1.0, 0.1)  # Slider pour Top-p
+max_tokens = st.number_input("Max tokens", min_value=50, max_value=1000, value=500, step=50)  # Input pour max_tokens
+
 # Structurer le prompt pour le LLM
 prompt_template = """
 You are a helpful assistant designed to answer user queries using only the information extracted from a set of product descriptions. 
@@ -75,7 +80,23 @@ openai.api_key = 'your-api-key'
 
 
 # Créer une fonction pour appeler GPT-3.5 Turbo
-def query_gpt3_turbo(query, documents):
+#def query_gpt3_turbo(query, documents):
+#    prompt = prompt_template.format(query=query, documents=documents)
+    
+#    response = openai.ChatCompletion.create(
+#        model="gpt-3.5-turbo",
+#        messages=[
+#            {"role": "system", "content": "You are a helpful assistant."},
+#            {"role": "user", "content": prompt}
+#        ],
+#        temperature=0,  # Le modèle doit être plus déterministe
+#        max_tokens=500,  # Limiter la taille de la réponse
+#    )
+    
+#    return response.choices[0].message['content']
+
+# Fonction pour interroger le modèle avec des paramètres dynamiques
+def query_gpt3_turbo_dynamic(query, documents, temperature, top_p, max_tokens):
     prompt = prompt_template.format(query=query, documents=documents)
     
     response = openai.ChatCompletion.create(
@@ -84,8 +105,9 @@ def query_gpt3_turbo(query, documents):
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
         ],
-        temperature=0,  # Le modèle doit être plus déterministe
-        max_tokens=500,  # Limiter la taille de la réponse
+        temperature=temperature,  # Valeur dynamique
+        top_p=top_p,  # Valeur dynamique
+        max_tokens=max_tokens,  # Valeur dynamique
     )
     
     return response.choices[0].message['content']
@@ -93,22 +115,34 @@ def query_gpt3_turbo(query, documents):
 # Demander à l'utilisateur de saisir une requête
 query = st.text_input("Enter your query:", "Products from China?")
 
+#if query:
+    # Effectuer la récupération des documents pertinents
+#    results = retriever.get_relevant_documents(query)
+
+    # Afficher les résultats de la récupération
+#    st.write("Sample retrieval results:")
+    # Afficher les résultats de la récupération
+#    for result in results:
+#        st.write(result.page_content)  # Utilisez page_content pour accéder au texte du document
+
+    # Préparer les documents pertinents pour GPT-3.5 Turbo
+#    relevant_documents = "\n".join([result.page_content for result in results])
+
+    # Exécuter GPT-3.5 Turbo avec le prompt structuré
+#    response = query_gpt3_turbo(query=query, documents=relevant_documents)
+    
+    # Afficher la réponse générée par GPT-3.5 Turbo
+ #   st.write("Response from GPT-3.5 Turbo:")
+  #  st.write(response)
+  
 if query:
     # Effectuer la récupération des documents pertinents
     results = retriever.get_relevant_documents(query)
-
-    # Afficher les résultats de la récupération
-    st.write("Sample retrieval results:")
-    # Afficher les résultats de la récupération
-    for result in results:
-        st.write(result.page_content)  # Utilisez page_content pour accéder au texte du document
-
-    # Préparer les documents pertinents pour GPT-3.5 Turbo
     relevant_documents = "\n".join([result.page_content for result in results])
 
-    # Exécuter GPT-3.5 Turbo avec le prompt structuré
-    response = query_gpt3_turbo(query=query, documents=relevant_documents)
-    
-    # Afficher la réponse générée par GPT-3.5 Turbo
+    # Appeler le modèle avec les paramètres choisis
+    response = query_gpt3_turbo_dynamic(query, relevant_documents, temperature, top_p, max_tokens)
+
+    # Afficher la réponse générée
     st.write("Response from GPT-3.5 Turbo:")
     st.write(response)
